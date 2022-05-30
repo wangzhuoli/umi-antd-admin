@@ -8,6 +8,12 @@ const routes: MenuDataItem[] = [
     icon: 'home',
   },
   {
+    path: '/',
+    component: '@/pages/table/index',
+    name: '高级表格',
+    icon: 'table',
+  },
+  {
     layout: false,
     path: '/user',
     component: '@/layouts/UserLayout',
