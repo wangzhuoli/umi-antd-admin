@@ -1,7 +1,9 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Tabs, Form, Input, Button, Checkbox } from 'antd';
 import { UserOutlined, LockOutlined, MobileOutlined } from '@ant-design/icons';
 import styles from './index.less';
+import { login } from '@/services/user';
+import { useRequest } from 'umi';
 
 const { TabPane } = Tabs;
 
@@ -10,10 +12,13 @@ type TableKey = 'account' | 'mobile' | string;
 const Login = () => {
   const [activeKey, setActiveKey] = useState<TableKey>('account');
 
-  const onFinish = () => {
-    console.log('0000');
-  };
-  console.log('0000');
+  const { data, loading, run } = useRequest(login, { manual: true });
+
+  useEffect(() => {}, []);
+
+  const onFinish = useCallback((values) => {
+    run({ data: values });
+  }, []);
 
   const getCode = useCallback(() => {
     //
@@ -106,6 +111,7 @@ const Login = () => {
           htmlType="submit"
           className="login-form-button"
           block
+          loading={loading}
           size="large"
         >
           登录
