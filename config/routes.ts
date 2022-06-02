@@ -8,7 +8,7 @@ const routes: MenuDataItem[] = [
     icon: 'home',
   },
   {
-    path: '/',
+    path: '/table',
     component: '@/pages/table/index',
     name: '高级表格',
     icon: 'table',

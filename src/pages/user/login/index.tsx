@@ -2,22 +2,43 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Tabs, Form, Input, Button, Checkbox } from 'antd';
 import { UserOutlined, LockOutlined, MobileOutlined } from '@ant-design/icons';
 import styles from './index.less';
-import { login } from '@/services/user';
-import { useRequest } from 'umi';
+import { fetchUserInfo, login } from '@/services/user';
+import { useRequest, history, useModel } from 'umi';
 
 const { TabPane } = Tabs;
 
 type TableKey = 'account' | 'mobile' | string;
 
 const Login = () => {
+  /**
+   *  登录方式
+   * */
   const [activeKey, setActiveKey] = useState<TableKey>('account');
-
-  const { data, loading, run } = useRequest(login, { manual: true });
-
-  useEffect(() => {}, []);
+  /**
+   * 登录请求
+   * */
+  const { data, loading, run } = useRequest<{ data: API.LoginResult }>(login, {
+    manual: true,
+  });
+  /**
+   * initialState
+   * */
+  const { refresh } = useModel('@@initialState');
+  /**
+   * 监听登录数据
+   * */
+  // @ts-ignore
+  useEffect(async () => {
+    if (data) {
+      // 登录成功-跳转到首页
+      localStorage.setItem('token', data.token);
+      await refresh();
+      history.push('/');
+    }
+  }, [data]);
 
   const onFinish = useCallback((values) => {
-    run({ data: values });
+    run(values);
   }, []);
 
   const getCode = useCallback(() => {
@@ -34,7 +55,7 @@ const Login = () => {
           <Input
             size="large"
             prefix={<UserOutlined className="site-form-item-icon" />}
-            placeholder="用户名：admin"
+            placeholder="用户名：随意填写"
           />
         </Form.Item>
         <Form.Item
@@ -45,7 +66,7 @@ const Login = () => {
             size="large"
             prefix={<LockOutlined className="site-form-item-icon" />}
             type="password"
-            placeholder="密码： 123456"
+            placeholder="密码： 随意填写"
           />
         </Form.Item>
       </>
@@ -62,7 +83,7 @@ const Login = () => {
           <Input
             size="large"
             prefix={<MobileOutlined className="site-form-item-icon" />}
-            placeholder="手机号：12345678910"
+            placeholder="手机号：随意填写"
           />
         </Form.Item>
         <Form.Item className={styles.codeFormItem}>
@@ -74,7 +95,7 @@ const Login = () => {
             <Input
               size="large"
               prefix={<LockOutlined className="site-form-item-icon" />}
-              placeholder="验证码：1234"
+              placeholder="验证码：随意填写"
             />
           </Form.Item>
           <Button

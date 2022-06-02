@@ -1,41 +1,29 @@
 import { ProTable } from '@ant-design/pro-components';
 import type { ProColumns } from '@ant-design/pro-components';
 import { Button, Space, Table } from 'antd';
-import { useCallback } from 'react';
-import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
-
-interface TableListItem {
-  username: string;
-  sex: 0 | 1;
-  mobile: string;
-  address: string;
-  age: number;
-  create_time: number;
-  id: number;
-}
-
-const tableDataSource: TableListItem[] = [];
-let id = 1;
-
-for (let i = 0; i < 200; i++) {
-  tableDataSource.push({
-    id: id,
-    sex: id % 2 === 0 ? 0 : 1,
-    create_time: new Date().getTime(),
-    age: id + 10,
-    address: '广东省惠州市博罗县',
-    mobile: '13799999999',
-    username: '用户' + (i + 1),
-  });
-  id++;
-}
+import { useCallback, useEffect, useState } from 'react';
+import { PageContainer } from '@ant-design/pro-layout';
+import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { fetchTableList } from '@/services/table';
 
 const ITable = () => {
-  const doEdit = useCallback((value: TableListItem) => {}, []);
+  const doEdit = useCallback((value: API.TableListItem) => {}, []);
+
+  /**
+   * 选中项发生变化时的回调
+   * */
+  const onSelectChange = useCallback((selectedRowKeys, selectedRows) => {
+    console.log(selectedRowKeys, selectedRows);
+  }, []);
+
+  /**
+   * 页数｜页码发生改变了
+   * */
   const onPageChange = useCallback((page: number, pageSize: number) => {
     console.log(page, pageSize);
   }, []);
-  const columns: ProColumns<TableListItem>[] = [
+
+  const columns: ProColumns<API.TableListItem>[] = [
     {
       title: '用户名',
       dataIndex: 'username',
@@ -54,6 +42,7 @@ const ITable = () => {
     {
       title: '年龄',
       dataIndex: 'age',
+      sorter: true,
     },
     {
       title: '手机号',
@@ -73,18 +62,45 @@ const ITable = () => {
       render: (text, record) => {
         return (
           <Space>
-            <Button onClick={doEdit.bind(this, record)}>编辑</Button>
-            <Button>删除</Button>
+            <Button
+              size={'small'}
+              type={'primary'}
+              onClick={doEdit.bind(this, record)}
+              icon={<EditOutlined />}
+            >
+              编辑
+            </Button>
+            <Button
+              type={'primary'}
+              danger
+              ghost
+              size={'small'}
+              icon={<DeleteOutlined />}
+            >
+              删除
+            </Button>
           </Space>
         );
       },
     },
   ];
   return (
-    <div style={{ padding: '20px' }}>
-      <ProTable<TableListItem>
-        dataSource={tableDataSource}
+    <PageContainer>
+      <ProTable<API.TableListItem>
         columns={columns}
+        request={async (params, sort, filter) => {
+          console.log(sort);
+          const { data } = await fetchTableList({
+            ...params,
+            ...filter,
+            sort,
+          });
+          return {
+            data: data?.list,
+            success: true,
+            total: data?.total,
+          };
+        }}
         rowKey={'id'}
         bordered
         cardBordered
@@ -94,6 +110,7 @@ const ITable = () => {
           // 注释该行则默认不显示下拉选项
           // selections: [],
           defaultSelectedRowKeys: [],
+          onChange: onSelectChange,
         }}
         tableAlertRender={({
           selectedRowKeys,
@@ -126,7 +143,7 @@ const ITable = () => {
           </Button>,
         ]}
       />
-    </div>
+    </PageContainer>
   );
 };
 
