@@ -1,12 +1,15 @@
 import { ProTable } from '@ant-design/pro-components';
 import type { ProColumns } from '@ant-design/pro-components';
 import { Button, Space, Table } from 'antd';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
+import useUrlState from '@ahooksjs/use-url-state';
 import { PageContainer } from '@ant-design/pro-layout';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { fetchTableList } from '@/services/table';
 
 const ITable = () => {
+  const [urlState, setUrlState] = useUrlState();
+
   const doEdit = useCallback((value: API.TableListItem) => {}, []);
 
   /**
@@ -22,6 +25,14 @@ const ITable = () => {
   const onPageChange = useCallback((page: number, pageSize: number) => {
     console.log(page, pageSize);
   }, []);
+
+  /**
+   * 提交表单触发
+   * */
+  const onSubmit = (params: any) => {
+    console.log(params);
+    setUrlState(params);
+  };
 
   const columns: ProColumns<API.TableListItem>[] = [
     {
@@ -42,6 +53,7 @@ const ITable = () => {
     {
       title: '年龄',
       dataIndex: 'age',
+      valueType: 'digit',
       sorter: true,
     },
     {
@@ -51,7 +63,16 @@ const ITable = () => {
     {
       title: '创建时间',
       dataIndex: 'create_time',
-      valueType: 'dateTime',
+      valueType: 'dateRange',
+      initialValue: [urlState.start_timer, urlState.end_timer],
+      search: {
+        transform: (value) => {
+          return {
+            start_time: value[0],
+            end_time: value[1],
+          };
+        },
+      },
     },
     {
       title: '操作',
@@ -88,8 +109,8 @@ const ITable = () => {
     <PageContainer>
       <ProTable<API.TableListItem>
         columns={columns}
+        onSubmit={onSubmit}
         request={async (params, sort, filter) => {
-          console.log(sort);
           const { data } = await fetchTableList({
             ...params,
             ...filter,
@@ -103,6 +124,7 @@ const ITable = () => {
         }}
         rowKey={'id'}
         bordered
+        form={{ initialValues: urlState }}
         cardBordered
         headerTitle={'高级表格'}
         rowSelection={{

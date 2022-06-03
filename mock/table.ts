@@ -3,7 +3,7 @@ import mock, { Random } from 'mockjs';
 export default {
   'GET /api/table/list': {
     data: mock.mock({
-      'list|10': [
+      'list|100': [
         {
           id: '@id',
           username: '@name',
@@ -13,7 +13,7 @@ export default {
           create_time: '@datetime',
         },
       ],
-      'total|50-300': 78,
+      'total|100': 100,
     }),
     msg: '',
   },
